@@ -1,5 +1,5 @@
 ﻿namespace Fiqs
 
-module Say =
-    let hello name =
-        printfn "Hello %s" name
+module Types =
+    let hello str =
+        0

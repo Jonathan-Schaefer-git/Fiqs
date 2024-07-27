@@ -6,10 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="BranchAndCut.fs" />
+    <Compile Include="ActiveSet.fs" />
     <None Include="Testing.fsx" />
     <Compile Include="Solver.fs" />
   </ItemGroup>
 
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+  </ItemGroup>
 
 </Project>
