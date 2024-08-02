@@ -6,14 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Types.fs" />
+    <Compile Include="Newton.fs" />
+    <Compile Include="QP.fs" />
     <Compile Include="BranchAndCut.fs" />
     <Compile Include="ActiveSet.fs" />
-    <None Include="Testing.fsx" />
     <Compile Include="Solver.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <PackageReference Include="MathNet.Numerics.FSharp" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

@@ -10,11 +10,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Fiqs", "Fiqs\Fiqs.fsproj", 
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Fiqs.Solver", "Fiqs.Solver\Fiqs.Solver.fsproj", "{C6D46EDF-B305-491E-895F-F40B7902B365}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Fiqs.Tests", "Fiqs.Tests\Fiqs.Tests.fsproj", "{AB95F4B5-A009-4B00-A86A-6C470D2EDB25}"
-	ProjectSection(ProjectDependencies) = postProject
-		{33DA5CE7-F911-4148-9A89-5F2E8C63616B} = {33DA5CE7-F911-4148-9A89-5F2E8C63616B}
-		{C6D46EDF-B305-491E-895F-F40B7902B365} = {C6D46EDF-B305-491E-895F-F40B7902B365}
-	EndProjectSection
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fiqs.Tests", "Fiqs.Tests\Fiqs.Tests.fsproj", "{241C9659-8DF6-43D7-AE99-E996E4AF8631}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,10 +26,10 @@ Global
 		{C6D46EDF-B305-491E-895F-F40B7902B365}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6D46EDF-B305-491E-895F-F40B7902B365}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6D46EDF-B305-491E-895F-F40B7902B365}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AB95F4B5-A009-4B00-A86A-6C470D2EDB25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AB95F4B5-A009-4B00-A86A-6C470D2EDB25}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AB95F4B5-A009-4B00-A86A-6C470D2EDB25}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AB95F4B5-A009-4B00-A86A-6C470D2EDB25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{241C9659-8DF6-43D7-AE99-E996E4AF8631}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{241C9659-8DF6-43D7-AE99-E996E4AF8631}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{241C9659-8DF6-43D7-AE99-E996E4AF8631}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{241C9659-8DF6-43D7-AE99-E996E4AF8631}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

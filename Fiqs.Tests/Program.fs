@@ -1,4 +1,4 @@
-﻿namespace Fiqs.Tests
+﻿module Program
 
-module DomainTests =
-    open Fiqs
+[<EntryPoint>]
+let main _ = 0
