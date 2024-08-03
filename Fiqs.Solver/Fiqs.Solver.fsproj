@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <Compile Include="Types.fs" />
-    <Compile Include="Newton.fs" />
     <Compile Include="QP.fs" />
     <Compile Include="BranchAndCut.fs" />
     <Compile Include="ActiveSet.fs" />

@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Testing.fsx" />
     <Compile Include="SolverTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
