@@ -3,47 +3,56 @@ open Types
 open MathNet.Numerics.LinearAlgebra
 open MathNet.Numerics.Optimization
 
-// 1.Newton Schritt für Polynome zweiten Grades immer Minimum
-let findMinimum (Q:Matrix<float>) (c:Vector<float>) (initGuess: Vector<float>) : Vector<float> =
-    initGuess - Q.Inverse() * c
-
-
 let solveQP (p:QPProblem) : (Vector<float> * float) option =
     let Q = p.Q
     let c = p.c
     let A = p.A
+    let At = A.Transpose()
     let b = p.b
     let lB = p.lowerBounds
     let uB = p.upperBounds
 
-    let objective (x:Vector<float>) : float =
-        0.5 * ((Q * x) * x) + (c * x)
-        
-    let gradient (x:Vector<float>) : Vector<float> =
-        Q * x + c
 
-    let constraints (x:Vector<float>) : Vector<float> =
-        A * x - b
-
-    let barrierTerm (x: Vector<float>) (lowerBounds: Vector<float>) (upperBounds: Vector<float>) : float =
-        let lowerTerm = x - lowerBounds
-        let upperTerm = upperBounds - x
-        - (lowerTerm.Map(fun xi -> log xi) + upperTerm.Map(fun xi -> log xi)).Sum()
+    let n = Q.RowCount
+    let m = A.ColumnCount
     
-    let barrierGradient (x: Vector<float>) (lowerBounds: Vector<float>) (upperBounds: Vector<float>) : Vector<float> =
-        let lowerTerm = x - lowerBounds
-        let upperTerm = upperBounds - x
-        lowerTerm.Map(fun xi -> 1.0 / xi) - upperTerm.Map(fun xi -> 1.0 / xi)
-    
+    let x = Vector<float>.Build.Dense(n, 1)
+    let lamba = Vector<float>.Build.Dense(m, 1)
+    let e = Vector<float>.Build.Dense(m, 1)
+
+    let tol = 1e-6
+    let maxIterations = 100
+
+    // Predictor Corrector Verfahren
+    let rec iterate (x:Vector<float>) (y:Vector<float>) (lambda:Vector<float>) (r_d:Vector<float>) (r_p:Vector<float>) i : Vector<float> option =
+        match i >= maxIterations with
+        | true -> None
+        | false ->
+            // Solve KKT and obtain affine direction
+            let Y = Matrix<float>.Build.SparseOfDiagonalVector y
+            let Yi = Y.Transpose()
+            let Lambda = Matrix.Build.SparseOfDiagonalVector lambda
+            let LambdaI = Lambda.Inverse()
+
+            let r_d = Q * x - At * lambda + c
+            let r_p = A * x - y - b
+            let mu = (y * lambda) / (float m)
+
+            let M = Q + At * Lambda * Yi * A
+
+            let calcAffinityGrad (sigma:float) = 
+                -r_d + (At * Yi * r_p) + (At * Yi * e) + (At * Yi * -sigma * mu * e)
+
+            let a = calcAffinityGrad 0.0
+
+            let affine = M.Solve(a)
 
 
-    let bounds =
-        [| 
-            for i in [0..(lB.Count - 1)] -> 
-                (lB.[i], uB.[i])
-        |]
 
-    Some (Vector<float>.Build.DenseOfArray [|0;1|], 1.0)
+
+    iterate x p.y lamba 
+
+
         
     
 

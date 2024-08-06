@@ -9,7 +9,6 @@
     <Compile Include="Types.fs" />
     <Compile Include="QP.fs" />
     <Compile Include="BranchAndCut.fs" />
-    <Compile Include="ActiveSet.fs" />
     <Compile Include="Solver.fs" />
   </ItemGroup>
 
