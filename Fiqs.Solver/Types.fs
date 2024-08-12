@@ -9,7 +9,18 @@ type QPProblem = {
     A: Matrix<float>
     y: Vector<float>
     b: Vector<float>
+    constant:float
     lowerBounds: Vector<float>
     upperBounds: Vector<float>
     tolerance:float
 }
+
+type Solution = {
+    Result:Vector<float>
+    ObjectiveValue:float
+    Iterations:int
+}
+
+type SolverResult =
+    | Optimal of Solution
+    | Infeasible of string

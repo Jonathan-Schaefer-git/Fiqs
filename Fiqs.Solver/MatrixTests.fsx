@@ -3,7 +3,7 @@ open MathNet.Numerics.LinearAlgebra
 
 let Q = matrix [[1.0;4.0];[4.0;0.0]]
 let x = vector [1.0;1.0]
-Q * x
+Q * x * x
 
 let A = matrix [[1.0; 1.0]]
 let At = A.Transpose()

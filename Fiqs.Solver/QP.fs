@@ -4,7 +4,7 @@ open MathNet.Numerics.LinearAlgebra
 open MathNet.Numerics.LinearAlgebra.Factorization
 open MathNet.Numerics.Optimization
 
-let solveQP (p:QPProblem) : (Vector<float> * int) option =
+let solveQP (p:QPProblem) : SolverResult =
     let Q = p.Q
     let c = p.c
     let A = p.A
@@ -24,17 +24,18 @@ let solveQP (p:QPProblem) : (Vector<float> * int) option =
     let e = Vector<float>.Build.Dense(m, 1)
 
     let tol = 1e-6
-    let maxIterations = 100
+    let maxIterations = 1000
 
     // Predictor Corrector Verfahren
-    let rec iterate (x:Vector<float>) (lambda:Vector<float>) (y:Vector<float>) (tau:float) (i:int) : (Vector<float> * int) option =
+    let rec iterate (x:Vector<float>) (lambda:Vector<float>) (y:Vector<float>) (tau:float) (i:int) : Solution option =
         
         // Residuen
         let r_d = (Q * x) - (At * lambda) + c
         let r_p = (A * x) - y - b
 
         if r_d.L2Norm() < tol && r_p.L2Norm() < tol then
-            Some (x,i)
+            let optimalSol = 0.5 * x * Q * x + c * x + p.constant
+            Some {Result = x; ObjectiveValue = optimalSol; Iterations = i}
 
         elif i >= maxIterations then
             None
@@ -105,4 +106,6 @@ let solveQP (p:QPProblem) : (Vector<float> * int) option =
             let new_y = y + alpha * delta_y
 
             iterate new_x new_lambda new_y (1.0 - (1.0 - tau) * exp(-0.2 * float i)) (i + 1)
-    iterate x lambda y 0.2 0
+    match iterate x lambda y 0.0 0 with
+    | Some sol -> Optimal sol
+    | None -> Infeasible "The model was deemed to be infeasible as it couldn't be solved in an appropriate time"

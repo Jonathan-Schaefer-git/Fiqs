@@ -7,16 +7,17 @@ open MathNet.Numerics.LinearAlgebra
 open Types
 
 
+
 [<Fact>]
-let ``Test solveQP with a simple QP problem`` () =
-    // Define a simple QP problem
-    let Q = matrix [[4.0; 1.0]; [1.0; 2.0]]
-    let c = vector [-1.0; -1.0]
-    let A = matrix [[1.0; 1.0]]
-    let y = vector [1.0]
-    let b = vector [1.0]
-    let lowerBounds = vector [0.0; 0.0]
-    let upperBounds = vector [10.0; 10.0]
+let ``Test solveQP for an unconstrained QP problem`` () =
+    // f(x) = (x-1)^2 = x^2 -2x + 1
+    let Q = matrix [[2.0]]
+    let c = vector [-2.0]
+    let A = matrix [[0.0]]
+    let y = vector [0.0]
+    let b = vector [0.0]
+    let lowerBounds = vector [Double.NegativeInfinity]
+    let upperBounds = vector [Double.PositiveInfinity]
     let tol = 1e-6
     
     let problem : QPProblem = {
@@ -27,20 +28,21 @@ let ``Test solveQP with a simple QP problem`` () =
         b = b
         lowerBounds = lowerBounds
         upperBounds = upperBounds
+        constant = 1.0
         tolerance = tol
     }
-    
-    // Solve the QP problem
-    let solution = QP.solveQP problem
 
-    // Expected solution (for this particular QP problem)
-    let expected_x = vector [0.0; 1.0] // This should be replaced with the actual expected solution
-    let expected_iterations = 1 // This depends on your implementation details
-    
+    let expectedSol = {
+        Result = vector [1.0]
+        ObjectiveValue = 0
+        Iterations = 1
+    }
+    // Solve the QP problem
+    let result = QP.solveQP problem
+
     // Validate the solution
-    match solution with
-    | Some (x, iterations) ->
-        Assert.True((x - expected_x).L2Norm() < tol, "Solution does not match the expected solution.")
-        Assert.Equal(expected_iterations, iterations)
-    | None ->
-        Assert.True(false, "Solver failed to find a solution.")
+    match result with
+    | Optimal sol ->
+        Assert.True (sol.Result = expectedSol.Result && sol.ObjectiveValue = expectedSol.ObjectiveValue && sol.Iterations <= expectedSol.Iterations)
+    | Infeasible _ ->
+        Assert.Fail("Model is infeasible")
