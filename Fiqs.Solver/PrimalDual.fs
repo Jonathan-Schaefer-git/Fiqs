@@ -99,7 +99,12 @@ let solveQP (p:QPProblem) : SolverResult =
             let new_lambda = lambda + alpha * delta_lambda
             let new_y = y + alpha * delta_y
 
-            iterate new_x new_lambda new_y (1.0 - (1.0 - tau) * exp(-0.2 * float i)) (i + 1)
+            // This applies the boundries element-wise
+            let projected_x =
+                new_x.MapIndexed(fun i x_i -> (max (min x_i uB.[i]) lB.[i]))
+
+
+            iterate projected_x new_lambda new_y (1.0 - (1.0 - tau) * exp(-0.2 * float i)) (i + 1)
     match iterate x lambda y 0.0 0 with
     | Some sol -> Optimal sol
     | None -> Infeasible "The model was deemed to be infeasible as it couldn't be solved in an appropriate time"

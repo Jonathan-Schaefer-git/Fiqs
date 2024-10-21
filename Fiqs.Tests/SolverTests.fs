@@ -77,6 +77,12 @@ let ``Test solveQP with equality constraints`` () =
         ObjectiveValue = 0.5
         Iterations = 100
     }
+    // Solve the QP problem
+    let result = QP.solveQP problem
 
-    let result = Barrier.solveQPBarrier problem
-    validate result expectedSol
+    // Validate the solution
+    match result with
+    | Optimal sol ->
+        Assert.True (sol.Result = expectedSol.Result && sol.ObjectiveValue = expectedSol.ObjectiveValue && sol.Iterations <= expectedSol.Iterations)
+    | Infeasible _ ->
+        Assert.Fail("Model is infeasible")
