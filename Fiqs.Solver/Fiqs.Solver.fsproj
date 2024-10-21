@@ -22,4 +22,9 @@
     <PackageReference Include="MathNet.Numerics.FSharp" Version="5.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Constrained\" />
+    <Folder Include="Unconstrained\" />
+  </ItemGroup>
+
 </Project>
