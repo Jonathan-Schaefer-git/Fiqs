@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Types.fs" />
+    <Compile Include="FiqsSolver.fs" />
     <Compile Include="Library.fs" />
   </ItemGroup>
 

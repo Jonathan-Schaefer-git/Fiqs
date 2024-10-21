@@ -7,12 +7,12 @@ type QPProblem = {
     Q: Matrix<float>
     c: Vector<float>
     A: Matrix<float>
-    y: Vector<float>
     b: Vector<float>
     constant:float
     lowerBounds: Vector<float>
     upperBounds: Vector<float>
     tolerance:float
+    maxIterations:int
 }
 
 type Solution = {

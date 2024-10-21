@@ -1,5 +1,5 @@
 ﻿namespace Fiqs
 
-module Types =
+module Test =
     let hello str =
         0

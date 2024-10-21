@@ -6,15 +6,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="ActiveSet.fs" />
     <None Include="Visualizer.fsx" />
     <None Include="MatrixTests.fsx" />
     <Compile Include="Types.fs" />
-    <Compile Include="QP.fs" />
+    <Compile Include="ALM.fs" />
+    <Compile Include="EquallyConstrained.fs" />
+    <Compile Include="PrimalDual.fs" />
+    <Compile Include="BarrierIPM.fs" />
     <Compile Include="BranchAndCut.fs" />
     <Compile Include="Solver.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics.FSharp" Version="5.0.0" />
