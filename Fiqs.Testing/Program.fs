@@ -6,39 +6,73 @@ let b = vector [ 1.0 ]
 let At = A.Transpose()
 
 let tol = 1e-6
-let maxIter = 1000
-let muInit = 2.0
+let maxIter = 100000
 
-let rec nonlinearConjugateGradient (x: Vector<float>) (g: Vector<float>) (d: Vector<float>) (i: int) =
-    if i > maxIter then
-        failwith "Reached max iterations"
-    elif g.L2Norm() < tol then
-        x, i // Converged
-    else
-        // Step size (line search or exact minimization for QP)
-        let alpha = - (g * d) / (d.DotProduct (Q * d))
-        
+
+let augmentedLagrangian (x: Vector<float>) (lambda: Vector<float>) (r: float) =
+    let penaltyTerm = 0.5 * r * ((A * x - b).L2Norm() ** 2.0)
+    let lagrangeMultiplierTerm = lambda * (A * x - b)
+    0.5 * x * Q * x + c * x + lagrangeMultiplierTerm + penaltyTerm
+
+let updateLagrangeMultipliers (lambda: Vector<float>) (x: Vector<float>) (r: float) =
+    lambda + r * (b - A * x)
+
+let gradientAugmentedLagrangian (x: Vector<float>) (lambda: Vector<float>) (r: float) =
+    let lagrangeTerm = A.Transpose() * lambda
+    let penaltyTerm = A.Transpose() * (A * x - b) * r
+    Q * x + c - lagrangeTerm - penaltyTerm
+
+let minimizePrimal (x: Vector<float>) (lambda: Vector<float>) (r: float) (tol: float) (maxIter: int) =
+    // Initialize gradient and search direction
+    let mutable g = gradientAugmentedLagrangian x lambda r
+    let mutable d = -g
+    let mutable x_current = x
+    let mutable iter = 0
+
+    while g.L2Norm() > tol && iter < maxIter do
+        // Compute step size (exact minimization for QP)
+        let alpha = -(g.DotProduct d) / (d.DotProduct (Q * d))
+
         // Update x and gradient
-        let new_x = x + alpha * d
-        let new_g = Q * new_x + c
-        
+        x_current <- x_current + alpha * d
+        let g_new = gradientAugmentedLagrangian x_current lambda r
+
         // Polak-Ribiere update for beta
-        let beta = (new_g.DotProduct (new_g - g)) / (g.DotProduct g)
-        
-        // Update direction
-        let new_d = -new_g + beta * d
-        
-        // Recur with updated values
-        nonlinearConjugateGradient new_x new_g new_d (i + 1)
+        let beta = (g_new.DotProduct (g_new - g)) / (g.DotProduct g)
+
+        // Update search direction
+        d <- -g_new + beta * d
+
+        // Update gradient and iteration count
+        g <- g_new
+        iter <- iter + 1
+
+    // Return the optimized primal variable
+    x_current
 
 
-let x0 = vector [100.0; 100.0] // Example starting point
-let g0 = Q * x0 + c // Gradient at x0
-let d0 = -g0 // Initial direction is negative gradient
+let rec augmentedLagrangianMethod (x: Vector<float>) (lambda: Vector<float>) (r: float) (tol: float) (iter: int) =
+    if iter > 100000 then failwith "Max iterations reached"
+    else
+        // Solve the primal problem (minimize Lagrangian over x)
+        let primalObjective = fun (x: Vector<float>) -> augmentedLagrangian x lambda r
+        // Use a solver like nonlinear CG or another minimizer to minimize primalObjective
+        let new_x : Vector<float> = minimizePrimal x lambda r tol 100
 
-let solution = nonlinearConjugateGradient x0 g0 d0 0
-printfn "Solution: %A" solution
+        // Check constraint satisfaction
+        let constraintViolation = (A * new_x - b).L2Norm()
+        if constraintViolation < tol then
+            new_x, lambda // Converged
+        else
+            // Update Lagrange multipliers
+            let new_lambda = updateLagrangeMultipliers lambda new_x r
+            // Update penalty parameter r if needed (e.g., r *= 1.1)
+            let new_r = r * 1.1
+            // Continue iterating
+            augmentedLagrangianMethod new_x new_lambda new_r tol (iter + 1)
 
+
+printfn "%A" (augmentedLagrangianMethod (vector [ 1.0; 1.0 ]) (vector [1.0]) 1.0 tol 0)
 //let tol = 1e-6
 //let smallValueThreshold = 1e-8
 //[<TailCall>]
