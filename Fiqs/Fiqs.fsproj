@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Domain.fs" />
     <Compile Include="Types.fs" />
+    <Compile Include="Domain.fs" />
     <Compile Include="AccordSolver.fs" />
     <Compile Include="FiqsSolver.fs" />
     <Compile Include="Library.fs" />

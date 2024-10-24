@@ -144,13 +144,6 @@ module Objective =
         }
     
 
-type Model =
-    member create 
-
-
-type Solver =
-    | FiqsBarrier
-
 
 type Settings = {
     Solver: Solver

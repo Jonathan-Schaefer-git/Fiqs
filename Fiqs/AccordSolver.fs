@@ -1,6 +1,6 @@
 ﻿module AccordSolver
 
-open Types
+open Fiqs.Types
 open Accord.Math.Optimization
 
 
