@@ -205,12 +205,16 @@ and LinearExpression =
         | _, Scalar b -> AddFloat (-b, lhs)
         | _ -> AddLinearExpression(lhs, Multiply(-1.0, rhs))
 
+    static member (-) (lhs:QuadraticExpression,rhs:LinearExpression) =
+        QuadraticAndLinear(lhs,Multiply(-1.0, rhs))
+
     // Overriding the * operator to handle Decision variables multiplication
     static member (*) (lhs: Decision, rhs: Decision) =
         MultiplyDecision(lhs, rhs)
 
     static member (+) (lhs:QuadraticExpression,rhs:LinearExpression) =
         QuadraticAndLinear(lhs,rhs)
+
     
     static member (*) (lhs: float, rhs: Decision) =
         Multiply(lhs, Decision rhs)
@@ -268,34 +272,6 @@ and ObjectiveExpression =
     | QuadraticAndLinear of QuadraticExpression * LinearExpression
 
 
-type QPProblem = {
-    Objective:ObjectiveExpression
-    Constraints:Constraint seq
-}
-
-// Output types
-exception SolverTimeOutException of string * TimeSpan
-exception MaxIterationsException of string * int
-exception SolverException of string
-exception InputError of string
-
-type Failure =
-    | Timeout of SolverTimeOutException
-    | Iterations of MaxIterationsException
-    | Exception of SolverException
-
-
-type Solution = {
-    ObjectiveValue: float
-    X: Vector<float>
-    SolutionMap:Dictionary<DecisionName,float>
-}
-
-type Result =
-    | Optimal of Solution
-    | Infeasible of Failure
-
-
 type ObjectiveSense =
     | Maximize
     | Minimize
@@ -307,26 +283,34 @@ type Objective = {
     Type: ObjectiveSense
     Expression: ObjectiveExpression
 }
-    
-[<RequireQualifiedAccess>]
-module ObjectiveExpression =
-    let evaluate (expr: ObjectiveExpression) =
-        match expr with
-        | LinearOnly linearExpr ->
-            // Evaluate just the linear part
-            let A, b = LinearExpression.evaluate linearExpr
-            A, b, None  // No quadratic part
-        
-        | QuadraticAndLinear (quadraticExpr, linearExpr) ->
-            // Evaluate both linear and quadratic parts
-            let Q = QuadraticExpression.evaluate quadraticExpr
-            let c, constant = LinearExpression.evaluate linearExpr
-            c, constant, Some Q  // Return both parts
 
-type Sovler =
+type SovlerType =
     | AccordLagrangian
 
 type Settings = {
-    Solver: Sovler
+    SolverType: SovlerType
     TimeoutMs: int
 }
+
+type Model = {
+    Objective:Objective
+    Constraints:Constraint seq
+}
+
+// Output types
+exception SolverTimeOutException of string * TimeSpan
+exception ConvergenceException of string
+exception InputError of string
+
+type Solution = {
+    ObjectiveValue: float
+    X: Vector<float>
+    SolutionMap:Dictionary<DecisionName,float>
+}
+
+
+
+type SolveResult = 
+    | Optimal of Solution
+    | Infeasible of exn
+    | Timeout of exn

@@ -6,10 +6,10 @@ open Fiqs
 open Accord.Math.Optimization
 open MathNet.Numerics.LinearAlgebra
 
-let convertToStandardForm (qpProblem: QPProblem) =
+let convertToStandardForm (model: Model) =
     // Convert the objective function to Q and c
     let (cD, constantTerm, maybeQ) = 
-        ObjectiveExpression.evaluate qpProblem.Objective
+        ObjectiveExpression.evaluate model.Objective.Expression
     
     // Handle cases where Q is missing
     let QD =
@@ -24,8 +24,8 @@ let convertToStandardForm (qpProblem: QPProblem) =
     // Merge keys and ensure uniqueness
     let keys = HashSet(List.append keys1 (List.append keys2 keys3))
     
-    let equalities = qpProblem.Constraints |> Seq.filter(fun x -> x.Expression.IsEquality) 
-    let inequalities = qpProblem.Constraints |> Seq.filter(fun x -> x.Expression.IsInequality)
+    let equalities = model.Constraints |> Seq.filter(fun x -> x.Expression.IsEquality) 
+    let inequalities = model.Constraints |> Seq.filter(fun x -> x.Expression.IsInequality)
 
     let n = keys.Count
     let m = inequalities |> Seq.length
@@ -86,16 +86,16 @@ let convertToStandardForm (qpProblem: QPProblem) =
         l.[i] <- rhs
     )
 
-    // Return the matrices Q, c, A, b and constant term
+    // Return the matrices Q, c, A, b, E, l, constant term and all keys
     Q, c, A, b, E, l, constantTerm, keys
     
 
-
+[<RequireQualifiedAccess>]
 type AccordSolver() =
-    member this.solve(p:QPProblem) = (this :> ISolver).solve(p)
+    member this.solve(model:Model) = (this :> ISolver).solve(model)
 
     interface ISolver with
-        member this.solve (p: QPProblem): Solution =
+        member this.solve (p: Model): SolveResult =
             let Q,c,A,b,E,l,constant,keys = convertToStandardForm p
 
             if Q <> Q.Transpose() then
@@ -125,9 +125,8 @@ type AccordSolver() =
                 )
                 |> Seq.ofArray
 
-            let constraints : IEnumerable<IConstraint> = Seq.append inequalities equalities |> Seq.map (fun x -> x)
+            let constraints : IEnumerable<IConstraint> = Seq.append inequalities equalities |> Seq.map (fun x -> x :> IConstraint)
             
-
             let alm = AugmentedLagrangian(objective, constraints)
             if alm.Minimize() then
                 let sol = alm.Solution
@@ -139,10 +138,10 @@ type AccordSolver() =
                         solutionMap.Add(keyArray[i], value)
                 )
 
-                
-                { ObjectiveValue = alm.Value + constant; X = DenseVector.ofArray sol; SolutionMap = solutionMap }
+                Optimal { ObjectiveValue = alm.Value + constant; X = DenseVector.ofArray sol; SolutionMap = solutionMap }
             else
-                raise(SolverException("Failed to converge"))
+                Infeasible (ConvergenceException("Failed to converge"))
+                
             
 
                 
