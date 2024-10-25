@@ -1,6 +1,6 @@
-﻿namespace Fiqs.Types
+﻿namespace Fiqs
 open System
-
+open Fiqs.Types
 
 
 [<RequireQualifiedAccess>]
@@ -10,20 +10,23 @@ type ISolver =
 
 [<RequireQualifiedAccess>]
 module Constraint =
-    let create constraintName (linear:LinearExpression) =
-        if linear.IsEmpty then
+    let create constraintName (constraintBy:ConstraintExpression) =
+        if String.IsNullOrEmpty(constraintName) then
             raise (InputError (sprintf "%s: Linear expression is empty" constraintName))
+        {
+            Constraint.Name = constraintName
+            Constraint.Expression = constraintBy
+        }
 
-
-//module Objective =
-//    let createObj name objectiveSense expression =
-//        if String.IsNullOrEmpty(name) then
-//            raise (InputError "An objective requires an objective name")
-//        {
-//            Name = ObjectiveName name
-//            Type = objectiveSense
-//            Expression = expression
-        //}
+module Objective =
+    let create name objectiveSense expression =
+        if String.IsNullOrEmpty(name) then
+            raise (InputError "An objective requires an objective name")
+        {
+            Name = ObjectiveName name
+            Type = objectiveSense
+            Expression = expression
+        }
 
 type Model = {
     Objective:ObjectiveExpression

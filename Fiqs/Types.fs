@@ -25,6 +25,12 @@ with
     static member (*) (lhs: Decision, rhs: Decision) =
         MultiplyDecision(lhs, rhs)
 
+    static member (<==) (lhs: Decision, rhs:float) =
+        Inequality(Linear (Decision lhs), Lesser, Linear (Scalar rhs))
+
+    static member (==>) (lhs: Decision, rhs:float) =
+        Inequality(Linear (Decision lhs), Greater, Linear (Scalar rhs))
+
 and Constraint = {
     Name:string
     Expression:ConstraintExpression
@@ -37,6 +43,9 @@ and Expression =
 with
     static member (+) (lhs:QuadraticExpression,rhs:LinearExpression) =
         QuadraticAndLinear(lhs,rhs)
+
+    static member (-) (lhs:QuadraticExpression,rhs:LinearExpression) =
+        QuadraticAndLinear(lhs,Multiply(-1.0, rhs))
 
 and ConstraintExpression =
     | Inequality of lhs:Expression * Inequality * rhs:Expression
@@ -77,7 +86,7 @@ and ConstraintExpression =
                     let b' = b
                     (A', b')
                 | Greater ->
-                    (A, b)
+                    (A, -b)
             | _ -> raise (NotImplementedException("No support for quadratic constraints yet"))
 
     static member (+) (rhs:QuadraticExpression, lhs:LinearExpression) =
@@ -216,11 +225,19 @@ and LinearExpression =
         | _, Scalar b -> Multiply(b, lhs)
         | _ -> failwith "Non-linear terms not supported for * between non-scalars."
 
+
+    // Constraint expression overrides
     static member (<==) (lhs:LinearExpression, rhs:float): ConstraintExpression =
         Inequality (Linear lhs, Lesser, Linear (Scalar rhs))
 
     static member (<==) (lhs:LinearExpression, rhs:LinearExpression): ConstraintExpression =
         Inequality (Linear lhs, Lesser, Linear rhs)
+
+    static member (<==) (lhs:Decision, rhs:LinearExpression): ConstraintExpression =
+        Inequality (Linear (Decision lhs), Lesser, Linear rhs)
+
+    static member (<==) (lhs:Decision, rhs:float): ConstraintExpression =
+        Inequality (Linear (Decision lhs), Lesser, Linear (Scalar rhs))
 
     static member (===) (lhs:LinearExpression, rhs:float) : ConstraintExpression =
         Equality(Linear lhs, Linear(Scalar rhs))
@@ -228,33 +245,32 @@ and LinearExpression =
     static member(===) (lhs:LinearExpression, rhs:LinearExpression) : ConstraintExpression =
         Equality(Linear lhs, Linear rhs)
 
-    static member (==>) (lhs:LinearExpression, rhs:float) : ConstraintExpression =
-        Inequality(Linear lhs, Greater, Linear(Scalar rhs))
+    static member(===) (lhs:Decision, rhs:float) : ConstraintExpression =
+        Equality(Linear (Decision lhs), Linear (Scalar rhs))
+
+    static member(===) (lhs:Decision, rhs:LinearExpression) : ConstraintExpression =
+        Equality(Linear (Decision lhs), Linear rhs)
+
+    static member (==>) (lhs:LinearExpression, rhs:float): ConstraintExpression =
+        Inequality (Linear lhs, Greater, Linear (Scalar rhs))
+
+    static member (==>) (lhs:LinearExpression, rhs:LinearExpression): ConstraintExpression =
+        Inequality (Linear lhs, Greater, Linear rhs)
+
+    static member (==>) (lhs:Decision, rhs:LinearExpression): ConstraintExpression =
+        Inequality (Linear (Decision lhs), Greater, Linear rhs)
+
+    static member (==>) (lhs:Decision, rhs:float): ConstraintExpression =
+        Inequality (Linear (Decision lhs), Greater, Linear (Scalar rhs))
 
 and ObjectiveExpression =
     | LinearOnly of LinearExpression
     | QuadraticAndLinear of QuadraticExpression * LinearExpression
 
-[<RequireQualifiedAccess>]
-module ObjectiveExpression =
-    let evaluate (expr: ObjectiveExpression) =
-        match expr with
-        | LinearOnly linearExpr ->
-            // Evaluate just the linear part
-            let A, b = LinearExpression.evaluate linearExpr
-            A, b, None  // No quadratic part
-        
-        | QuadraticAndLinear (quadraticExpr, linearExpr) ->
-            // Evaluate both linear and quadratic parts
-            let Q = QuadraticExpression.evaluate quadraticExpr
-            let c, constant = LinearExpression.evaluate linearExpr
-            c, constant, Some Q  // Return both parts
-
-
 
 type QPProblem = {
     Objective:ObjectiveExpression
-    Constraints:Constraint list
+    Constraints:Constraint seq
 }
 
 // Output types
@@ -292,6 +308,20 @@ type Objective = {
     Expression: ObjectiveExpression
 }
     
+[<RequireQualifiedAccess>]
+module ObjectiveExpression =
+    let evaluate (expr: ObjectiveExpression) =
+        match expr with
+        | LinearOnly linearExpr ->
+            // Evaluate just the linear part
+            let A, b = LinearExpression.evaluate linearExpr
+            A, b, None  // No quadratic part
+        
+        | QuadraticAndLinear (quadraticExpr, linearExpr) ->
+            // Evaluate both linear and quadratic parts
+            let Q = QuadraticExpression.evaluate quadraticExpr
+            let c, constant = LinearExpression.evaluate linearExpr
+            c, constant, Some Q  // Return both parts
 
 type Sovler =
     | AccordLagrangian

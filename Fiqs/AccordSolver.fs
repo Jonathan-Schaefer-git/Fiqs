@@ -2,6 +2,7 @@
 open System.Collections.Generic
 open System.Linq
 open Fiqs.Types
+open Fiqs
 open Accord.Math.Optimization
 open MathNet.Numerics.LinearAlgebra
 
@@ -52,8 +53,8 @@ let convertToStandardForm (qpProblem: QPProblem) =
         let i = Seq.findIndex ((=) key1) keys  // Get index of key1
         let j = Seq.findIndex ((=) key2) keys  // Get index of key2
         if QD.ContainsKey((key1, key2)) then
-            Q.[i, j] <- QD.[(key1, key2)]
-            Q.[j, i] <- QD.[(key1, key2)]  // Ensure symmetry for Q
+            Q.[i, j] <- QD.[(key1, key2)] * 2.0
+            Q.[j, i] <- QD.[(key1, key2)] * 2.0 // Ensure symmetry for Q
     )
    
 
@@ -90,7 +91,9 @@ let convertToStandardForm (qpProblem: QPProblem) =
     
 
 
-type AccordSolver =
+type AccordSolver() =
+    member this.solve(p:QPProblem) = (this :> ISolver).solve(p)
+
     interface ISolver with
         member this.solve (p: QPProblem): Solution =
             let Q,c,A,b,E,l,constant,keys = convertToStandardForm p

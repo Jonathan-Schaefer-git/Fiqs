@@ -9,9 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="EqualitySolver.fs" />
-    <Compile Include="SolverBenchmarks.fs" />
-    <Compile Include="SolverTests.fs" />
+    <Compile Include="FiqsDomain.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -30,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fiqs.Solver\Fiqs.Solver.fsproj" />
     <ProjectReference Include="..\Fiqs\Fiqs.fsproj" />
   </ItemGroup>
 
